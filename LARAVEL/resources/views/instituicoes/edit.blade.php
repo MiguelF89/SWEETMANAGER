@@ -1,71 +1,53 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Editar Instituição') }}
-        </h2>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar Instituição</h2>
+                <p class="text-sm text-gray-600">Atualize os dados da instituição.</p>
+            </div>
+            <a href="{{ route('instituicoes.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">
+                Voltar para lista
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('instituicoes.update', $instituicao->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <form action="{{ route('instituicoes.update', $instituicao->id) }}" method="POST" class="space-y-6">
+                    @csrf
+                    @method('PUT')
 
-                        <div class="mb-4">
-                            <label for="nome" class="block text-gray-700 text-sm font-bold mb-2">Nome</label>
-                            <input type="text" name="nome" id="nome" class="w-full px-3 py-2 border border-gray-300 rounded @error('nome') border-red-500 @enderror" value="{{ old('nome', $instituicao->nome) }}">
-                            @error('nome')
-                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nome</label>
+                        <input type="text" name="nome" value="{{ old('nome', $instituicao->nome) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required />
+                        @error('nome') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="contato" class="block text-gray-700 text-sm font-bold mb-2">Contato</label>
-                            {{-- Exibe formatado; ao editar, aceita qualquer formato --}}
-                            <input type="text" name="contato" id="contato"
-                                   inputmode="numeric"
-                                   placeholder="(XX) XXXXX-XXXX"
-                                   maxlength="15"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded @error('contato') border-red-500 @enderror"
-                                   value="{{ old('contato', $instituicao->contato_formatted) }}">
-                            @error('contato')
-                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Contato</label>
+                        <input type="text" name="contato" value="{{ old('contato', $instituicao->contato_formatted) }}" inputmode="numeric" placeholder="(XX) XXXXX-XXXX" maxlength="15" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                        @error('contato') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="cnpj" class="block text-gray-700 text-sm font-bold mb-2">CNPJ</label>
-                            {{-- Exibe formatado; ao editar, aceita qualquer formato --}}
-                            <input type="text" name="cnpj" id="cnpj"
-                                   inputmode="numeric"
-                                   placeholder="00.000.000/0000-00"
-                                   maxlength="18"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded @error('cnpj') border-red-500 @enderror"
-                                   value="{{ old('cnpj', $instituicao->cnpj_formatted) }}">
-                            @error('cnpj')
-                                <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">CNPJ</label>
+                        <input type="text" name="cnpj" value="{{ old('cnpj', $instituicao->cnpj_formatted) }}" inputmode="numeric" placeholder="00.000.000/0000-00" maxlength="18" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                        @error('cnpj') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Atualizar
-                            </button>
-                            <a href="{{ route('instituicoes.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    <div class="flex justify-end gap-3">
+                        <a href="{{ route('instituicoes.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</a>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Atualizar Instituição</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     @push('scripts')
     <script>
-        document.getElementById('cnpj').addEventListener('input', function () {
+        document.getElementById('cnpj')?.addEventListener('input', function () {
             let v = this.value.replace(/\D/g, '').substring(0, 14);
             if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
             else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
@@ -74,7 +56,7 @@
             this.value = v;
         });
 
-        document.getElementById('contato').addEventListener('input', function () {
+        document.getElementById('contato')?.addEventListener('input', function () {
             let v = this.value.replace(/\D/g, '').substring(0, 11);
             if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
             else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');

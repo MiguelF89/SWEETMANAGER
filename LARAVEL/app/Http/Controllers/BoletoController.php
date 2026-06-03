@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BoletoReadRequest;
+use App\Http\Requests\PagarBoletoRequest;
+use App\Http\Requests\UpdateBoletoRequest;
 use App\Models\Boleto;
 use App\Services\BoletoReaderService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,15 +26,41 @@ class BoletoController extends Controller
             $service = app(BoletoReaderService::class);
             $data = $service->read($request->file('file'));
 
+            // Validações adicionais dos dados extraídos
+            if (!isset($data['amount']) || $data['amount'] <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'O boleto deve ter um valor maior que zero.',
+                ], 422);
+            }
+
+            if (!isset($data['due_date'])) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Não foi possível extrair a data de vencimento do boleto.',
+                ], 422);
+            }
+
+            // Valida data de vencimento
+            try {
+                $vencimento = Carbon::createFromFormat('Y-m-d', $data['due_date']);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Data de vencimento inválida.',
+                ], 422);
+            }
+
             // Salva automaticamente na tabela de boletos
             $boleto = Boleto::create([
-                'barcode'        => $data['barcode']        ?? null,
+                'barcode'         => $data['barcode'] ?? null,
                 'linha_digitavel' => $data['linha_digitavel'] ?? null,
-                'valor'          => $data['amount']         ?? null,
-                'vencimento'     => $data['due_date']       ?? null,
-                'banco'          => $data['bank']           ?? null,
-                'descricao'      => $request->input('descricao', 'Boleto importado automaticamente'),
-                'status'         => 'pendente',
+                'valor'           => (float)$data['amount'],
+                'vencimento'      => $vencimento,
+                'banco'           => $data['bank'] ?? null,
+                'descricao'       => 'Boleto importado automaticamente',
+                'status'          => 'pendente',
+                'user_id'         => $request->user()->id,
             ]);
 
             return response()->json([
@@ -44,7 +73,7 @@ class BoletoController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
         } catch (\Throwable $e) {
             report($e);
-            return response()->json(['success' => false, 'error' => 'Erro interno.'], 500);
+            return response()->json(['success' => false, 'error' => 'Erro interno ao processar boleto.'], 500);
         }
     }
 
@@ -52,6 +81,11 @@ class BoletoController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status', 'todos');
+        
+        // Valida parâmetro status
+        if (!in_array($status, ['todos', 'pendente', 'pago', 'vencido'])) {
+            $status = 'todos';
+        }
 
         $query = Boleto::orderBy('vencimento');
 
@@ -59,6 +93,8 @@ class BoletoController extends Controller
             $query->where('status', 'pendente');
         } elseif ($status === 'pago') {
             $query->where('status', 'pago');
+        } elseif ($status === 'vencido') {
+            $query->where('status', 'vencido');
         }
 
         $boletos = $query->paginate(15)->withQueryString();
@@ -73,24 +109,34 @@ class BoletoController extends Controller
     }
 
     // ── Marcar como pago ───────────────────────────────────────
-    public function pagar(Request $request, Boleto $boleto): JsonResponse
+    public function pagar(PagarBoletoRequest $request, Boleto $boleto): JsonResponse
     {
+        $validated = $request->validated();
+
         $boleto->update([
             'status'         => 'pago',
-            'data_pagamento' => $request->input('data_pagamento', now()->toDateString()),
+            'data_pagamento' => $validated['data_pagamento'],
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Boleto marcado como pago.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Boleto marcado como pago.',
+        ]);
     }
 
     // ── Editar descrição ───────────────────────────────────────
-    public function update(Request $request, Boleto $boleto): JsonResponse
+    public function update(UpdateBoletoRequest $request, Boleto $boleto): JsonResponse
     {
-        $request->validate(['descricao' => 'required|string|max:255']);
+        $validated = $request->validated();
 
-        $boleto->update(['descricao' => $request->descricao]);
+        $boleto->update([
+            'descricao' => $validated['descricao'],
+        ]);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Descrição atualizada com sucesso.',
+        ]);
     }
 
     // ── Excluir ────────────────────────────────────────────────
@@ -98,6 +144,9 @@ class BoletoController extends Controller
     {
         $boleto->delete();
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Boleto deletado com sucesso.',
+        ]);
     }
 }

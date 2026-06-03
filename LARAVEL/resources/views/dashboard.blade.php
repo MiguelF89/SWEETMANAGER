@@ -34,17 +34,17 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <a href="{{ route('instituicoes.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded text-center">Criar Instituição</a>
-                <a href="{{ route('produtos.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-6 rounded text-center">Criar Produto</a>
-                <a href="{{ route('vendas.create') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded text-center">Criar Venda</a>
-                <a href="{{ route('encomendas.create') }}" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded text-center">Criar Encomenda</a>
+                <a href="{{ route('instituicoes.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium">Criar Instituição</a>
+                <a href="{{ route('produtos.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium">Criar Produto</a>
+                <a href="{{ route('vendas.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition font-medium">Criar Venda</a>
+                <a href="{{ route('encomendas.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium">Criar Encomenda</a>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">Entregas próximas</h3>
-                        <a href="{{ route('encomendas.index') }}" class="text-blue-500 hover:text-blue-700">Ver todas</a>
+                        <h3 class="text-lg font-semibold text-gray-900">Entregas próximas</h3>
+                        <a href="{{ route('encomendas.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todas</a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -59,7 +59,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($entregasProximas as $encomenda)
-                                    <tr>
+                                    <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $encomenda->cliente }}</td>
                                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $encomenda->data_entrega->format('d/m/Y') }}</td>
                                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">R$ {{ number_format($encomenda->valor, 2, ',', '.') }}</td>
@@ -81,70 +81,66 @@
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Últimas Instituições</h3>
+            <div class="bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Últimas Instituições</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-gray-300">
-                            <thead class="bg-gray-100">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="border border-gray-300 px-4 py-2">ID</th>
-                                    <th class="border border-gray-300 px-4 py-2">Nome</th>
-                                    <th class="border border-gray-300 px-4 py-2">Contato</th>
-                                    <th class="border border-gray-300 px-4 py-2">CNPJ</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contato</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">CNPJ</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($instituicoes as $instituicao)
-                                    <tr>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $instituicao->id }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $instituicao->nome }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $instituicao->contato }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $instituicao->cnpj }}</td>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->nome }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->contato_formatted }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->cnpj_formatted }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="border border-gray-300 px-4 py-2 text-center">Nenhuma instituição cadastrada</td>
+                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Nenhuma instituição cadastrada</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('instituicoes.index') }}" class="text-blue-500 hover:text-blue-700">Ver todas as instituições</a>
+                        <a href="{{ route('instituicoes.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todas as instituições</a>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Últimos Produtos</h3>
+            <div class="bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Últimos Produtos</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-gray-300">
-                            <thead class="bg-gray-100">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="border border-gray-300 px-4 py-2">ID</th>
-                                    <th class="border border-gray-300 px-4 py-2">Nome</th>
-                                    <th class="border border-gray-300 px-4 py-2">Preço</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Preço</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($produtos as $produto)
-                                    <tr>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $produto->id }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $produto->nome }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $produto->nome }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="border border-gray-300 px-4 py-2 text-center">Nenhum produto cadastrado</td>
+                                        <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">Nenhum produto cadastrado</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('produtos.index') }}" class="text-blue-500 hover:text-blue-700">Ver todos os produtos</a>
+                        <a href="{{ route('produtos.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todos os produtos</a>
                     </div>
                 </div>
             </div>

@@ -1,59 +1,45 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Criar Produto
-        </h2>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Novo Produto</h2>
+                <p class="text-sm text-gray-600">Cadastre um novo produto para o seu sistema.</p>
+            </div>
+            <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">
+                Voltar para lista
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('produtos.store') }}" method="POST">
-                        @csrf
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <form action="{{ route('produtos.store') }}" method="POST" class="space-y-6">
+                    @csrf
 
-                        <div class="mb-4">
-                            <label for="nome" class="block text-gray-700 text-sm font-bold mb-2">Nome do Produto</label>
-                            <input type="text" name="nome" id="nome"
-                                class="w-full px-3 py-2 border border-gray-300 rounded @error('nome') border-red-500 @enderror"
-                                value="{{ old('nome') }}"
-                                placeholder="Ex: Bolo de Chocolate">
-                            @error('nome')
-                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nome do Produto</label>
+                        <input type="text" name="nome" value="{{ old('nome') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Ex: Bolo de Chocolate" required />
+                        @error('nome') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="preco" class="block text-gray-700 text-sm font-bold mb-2">Preço</label>
-                            <div class="relative">
-                                <div class="flex items-center border border-gray-300 rounded @error('preco') border-red-500 @enderror overflow-hidden">
-                                    <span class="bg-gray-100 border-r border-gray-300 px-3 py-2 text-gray-600 font-semibold select-none">R$</span>
-                                    <input type="number" name="preco" id="preco" step="0.01" min="0"
-                                        class="flex-1 px-3 py-2 focus:outline-none"
-                                        value="{{ old('preco') }}"
-                                        placeholder="0,00"
-                                        oninput="atualizarPreview(this.value)">
-                                </div>
-                            </div>
-                            <!-- Preview em tempo real -->
-                            <p class="mt-2 text-sm text-gray-500">
-                                Valor formatado: <span id="preco-preview" class="font-semibold text-green-600">R$ 0,00</span>
-                            </p>
-                            @error('preco')
-                                <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                            @enderror
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Preço</label>
+                        <div class="mt-1 flex items-center">
+                            <span class="text-gray-500 mr-2">R$</span>
+                            <input type="number" name="preco" value="{{ old('preco') }}" step="0.01" min="0" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0,00" oninput="atualizarPreview(this.value)" required />
                         </div>
+                        <p class="mt-2 text-sm text-gray-500">
+                            Valor formatado: <span id="preco-preview" class="font-semibold text-green-600">R$ 0,00</span>
+                        </p>
+                        @error('preco') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Salvar
-                            </button>
-                            <a href="{{ route('produtos.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    <div class="flex justify-end gap-3">
+                        <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</a>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar Produto</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -72,9 +58,8 @@
             }
         }
 
-        // Inicializa com valor já preenchido (caso de erro de validação)
         document.addEventListener('DOMContentLoaded', function() {
-            const input = document.getElementById('preco');
+            const input = document.querySelector('input[name="preco"]');
             if (input.value) atualizarPreview(input.value);
         });
     </script>

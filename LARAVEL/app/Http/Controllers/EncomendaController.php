@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEncomendaRequest;
 use App\Http\Requests\UpdateEncomendaRequest;
 use App\Models\Encomenda;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EncomendaController extends Controller
@@ -19,26 +20,30 @@ class EncomendaController extends Controller
         $query = $request->user()->encomendas();
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($sub) use ($search) {
-                $sub->where('cliente', 'like', "%{$search}%")
-                    ->orWhere('descricao', 'like', "%{$search}%")
-                    ->orWhere('observacoes', 'like', "%{$search}%");
-            });
+            $search = trim($request->search);
+            if (!empty($search) && strlen($search) >= 3) {
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('cliente', 'like', "%{$search}%")
+                        ->orWhere('descricao', 'like', "%{$search}%")
+                        ->orWhere('observacoes', 'like', "%{$search}%");
+                });
+            }
         }
 
         if ($request->filled('status')) {
-            if ($request->status === 'pago') {
+            $status = $request->status;
+            if ($status === 'pago') {
                 $query->where('pago', true);
-            } elseif ($request->status === 'pendente') {
+            } elseif ($status === 'pendente') {
                 $query->where('pago', false);
             }
         }
 
         if ($request->filled('repassado')) {
-            if ($request->repassado === 'sim') {
+            $repassado = $request->repassado;
+            if ($repassado === 'sim') {
                 $query->where('repassado_cliente', true);
-            } elseif ($request->repassado === 'nao') {
+            } elseif ($repassado === 'nao') {
                 $query->where('repassado_cliente', false);
             }
         }

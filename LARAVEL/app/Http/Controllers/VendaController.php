@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreVendaRequest;
+use App\Http\Requests\UpdateVendaRequest;
 use App\Models\Venda;
 use App\Models\Instituicao;
 use App\Models\Produto;
@@ -11,31 +13,37 @@ class VendaController extends Controller
 {
     public function index()
     {
-        $vendas = Venda::with(['instituicao', 'produto'])->paginate(10);
-        return view('vendas.index', compact('vendas'));
+        $search = request('search');
+        
+        $vendas = Venda::with(['instituicao', 'produto'])
+            ->when($search, function ($query) use ($search) {
+                $query->whereHas('instituicao', function ($q) use ($search) {
+                    $q->where('nome', 'like', "%{$search}%");
+                })->orWhereHas('produto', function ($q) use ($search) {
+                    $q->where('nome', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(10);
+        
+        return view('vendas.index', compact('vendas', 'search'));
     }
 
     public function create()
     {
-        // Mostra apenas instituições e produtos do usuário logado
         $instituicoes = Instituicao::all();
         $produtos = Produto::all();
         return view('vendas.create', compact('instituicoes', 'produtos'));
     }
 
-    public function store(Request $request)
+    public function store(StoreVendaRequest $request)
     {
-        $validated = $request->validate([
-            'instituicao_id' => 'required|exists:instituicoes,id',
-            'produto_id'     => 'required|exists:produtos,id',
-            'quantidade'     => 'required|numeric|min:1',
-        ]);
+        $validated = $request->validated();
 
-        // Verifica que a instituição e o produto pertencem ao usuário logado
         $produto = Produto::findOrFail($validated['produto_id']);
-        Instituicao::findOrFail($validated['instituicao_id']); // lança 404 se não for do user
-
-        $validated['valor_total'] = $produto->preco * $validated['quantidade'];
+        
+        // Calcula o valor total de forma segura no backend
+        $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
+        $validated['quantidade'] = (int)$validated['quantidade'];
 
         Venda::create($validated);
 
@@ -49,18 +57,15 @@ class VendaController extends Controller
         return view('vendas.edit', compact('venda', 'instituicoes', 'produtos'));
     }
 
-    public function update(Request $request, Venda $venda)
+    public function update(UpdateVendaRequest $request, Venda $venda)
     {
-        $validated = $request->validate([
-            'instituicao_id' => 'required|exists:instituicoes,id',
-            'produto_id'     => 'required|exists:produtos,id',
-            'quantidade'     => 'required|numeric|min:1',
-        ]);
+        $validated = $request->validated();
 
         $produto = Produto::findOrFail($validated['produto_id']);
-        Instituicao::findOrFail($validated['instituicao_id']);
-
-        $validated['valor_total'] = $produto->preco * $validated['quantidade'];
+        
+        // Calcula o valor total de forma segura no backend
+        $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
+        $validated['quantidade'] = (int)$validated['quantidade'];
 
         $venda->update($validated);
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Requests\Api\StoreVendaApiRequest;
+use App\Http\Requests\Api\UpdateVendaApiRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Venda;
 use App\Models\Produto;
@@ -16,17 +18,14 @@ class VendaApiController extends Controller
         );
     }
 
-    public function store(Request $request)
+    public function store(StoreVendaApiRequest $request)
     {
-        $validated = $request->validate([
-            'instituicao_id' => 'required|exists:instituicoes,id',
-            'produto_id' => 'required|exists:produtos,id',
-            'quantidade' => 'required|numeric|min:1',
-        ]);
-
+        $validated = $request->validated();
+        
         $produto = Produto::findOrFail($validated['produto_id']);
-
-        $validated['valor_total'] = $produto->preco * $validated['quantidade'];
+        
+        $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
+        $validated['quantidade'] = (int)$validated['quantidade'];
 
         $venda = Venda::create($validated);
 
@@ -35,23 +34,23 @@ class VendaApiController extends Controller
 
     public function show($id)
     {
+        $id = (int)$id;
         $venda = Venda::with(['instituicao', 'produto'])->findOrFail($id);
+        
         return response()->json($venda);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateVendaApiRequest $request, $id)
     {
+        $id = (int)$id;
         $venda = Venda::findOrFail($id);
 
-        $validated = $request->validate([
-            'instituicao_id' => 'required|exists:instituicoes,id',
-            'produto_id' => 'required|exists:produtos,id',
-            'quantidade' => 'required|numeric|min:1',
-        ]);
-
+        $validated = $request->validated();
+        
         $produto = Produto::findOrFail($validated['produto_id']);
-
-        $validated['valor_total'] = $produto->preco * $validated['quantidade'];
+        
+        $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
+        $validated['quantidade'] = (int)$validated['quantidade'];
 
         $venda->update($validated);
 
@@ -60,7 +59,10 @@ class VendaApiController extends Controller
 
     public function destroy($id)
     {
-        Venda::destroy($id);
-        return response()->json(['message' => 'Venda deletada com sucesso']);
+        $id = (int)$id;
+        $venda = Venda::findOrFail($id);
+        $venda->delete();
+        
+        return response()->json(['message' => 'Venda deletada com sucesso'], 200);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProdutoRequest;
+use App\Http\Requests\UpdateProdutoRequest;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 
@@ -9,9 +11,13 @@ class ProdutoController extends Controller
 {
     public function index()
     {
-        // Global scope já filtra por user_id automaticamente
-        $produtos = Produto::paginate(10);
-        return view('produtos.index', compact('produtos'));
+        $search = request('search');
+        
+        $produtos = Produto::when($search, function ($query) use ($search) {
+            $query->where('nome', 'like', "%{$search}%");
+        })->paginate(10);
+        
+        return view('produtos.index', compact('produtos', 'search'));
     }
 
     public function create()
@@ -19,12 +25,10 @@ class ProdutoController extends Controller
         return view('produtos.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreProdutoRequest $request)
     {
-        $validated = $request->validate([
-            'nome'  => 'required|string',
-            'preco' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
+        $validated['preco'] = (float)$validated['preco'];
 
         Produto::create($validated);
 
@@ -36,12 +40,10 @@ class ProdutoController extends Controller
         return view('produtos.edit', compact('produto'));
     }
 
-    public function update(Request $request, Produto $produto)
+    public function update(UpdateProdutoRequest $request, Produto $produto)
     {
-        $validated = $request->validate([
-            'nome'  => 'required|string',
-            'preco' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
+        $validated['preco'] = (float)$validated['preco'];
 
         $produto->update($validated);
 

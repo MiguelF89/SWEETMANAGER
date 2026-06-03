@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\BrasilHelper;
+use App\Http\Requests\StoreInstituicaoRequest;
+use App\Http\Requests\UpdateInstituicaoRequest;
 use App\Models\Instituicao;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Helpers\ValidacaoBrasileira;
 
 class InstituicaoController extends Controller
 {
     public function index()
     {
-        $instituicoes = Instituicao::paginate(10);
-        return view('instituicoes.index', compact('instituicoes'));
+        $search = request('search');
+        
+        $instituicoes = Instituicao::when($search, function ($query) use ($search) {
+            $query->where('nome', 'like', "%{$search}%")
+                  ->orWhere('cnpj', 'like', "%{$search}%");
+        })->paginate(10);
+        
+        return view('instituicoes.index', compact('instituicoes', 'search'));
     }
 
     public function create()
@@ -20,21 +28,13 @@ class InstituicaoController extends Controller
         return view('instituicoes.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreInstituicaoRequest $request)
     {
-        $validated = $request->validate([
-            'nome'    => 'required|string',
-            'contato' => ['required', 'string', function ($attr, $value, $fail) {
-                if (!BrasilHelper::validatePhone($value)) {
-                    $fail('O contato deve ser um telefone brasileiro válido (10 ou 11 dígitos).');
-                }
-            }],
-            'cnpj'    => ['required', 'string', function ($attr, $value, $fail) {
-                if (!BrasilHelper::validateCnpj($value)) {
-                    $fail('O CNPJ informado é inválido.');
-                }
-            }],
-        ]);
+        $validated = $request->validated();
+
+        // Normaliza CNPJ e telefone antes de salvar
+        $validated['cnpj'] = ValidacaoBrasileira::normalizarCNPJ($validated['cnpj']);
+        $validated['contato'] = ValidacaoBrasileira::normalizarTelefone($validated['contato']);
 
         Instituicao::create($validated);
 
@@ -46,21 +46,13 @@ class InstituicaoController extends Controller
         return view('instituicoes.edit', compact('instituicao'));
     }
 
-    public function update(Request $request, Instituicao $instituicao)
+    public function update(UpdateInstituicaoRequest $request, Instituicao $instituicao)
     {
-        $validated = $request->validate([
-            'nome'    => 'required|string',
-            'contato' => ['required', 'string', function ($attr, $value, $fail) {
-                if (!BrasilHelper::validatePhone($value)) {
-                    $fail('O contato deve ser um telefone brasileiro válido (10 ou 11 dígitos).');
-                }
-            }],
-            'cnpj'    => ['required', 'string', function ($attr, $value, $fail) {
-                if (!BrasilHelper::validateCnpj($value)) {
-                    $fail('O CNPJ informado é inválido.');
-                }
-            }],
-        ]);
+        $validated = $request->validated();
+
+        // Normaliza CNPJ e telefone antes de salvar
+        $validated['cnpj'] = ValidacaoBrasileira::normalizarCNPJ($validated['cnpj']);
+        $validated['contato'] = ValidacaoBrasileira::normalizarTelefone($validated['contato']);
 
         $instituicao->update($validated);
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Requests\Api\StoreProdutoApiRequest;
+use App\Http\Requests\Api\UpdateProdutoApiRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Produto;
 use Illuminate\Http\Request;
@@ -13,12 +15,10 @@ class ProdutoApiController extends Controller
         return response()->json(Produto::all());
     }
 
-    public function store(Request $request)
+    public function store(StoreProdutoApiRequest $request)
     {
-        $validated = $request->validate([
-            'nome' => 'required|string',
-            'preco' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
+        $validated['preco'] = (float)$validated['preco'];
 
         $produto = Produto::create($validated);
 
@@ -27,21 +27,31 @@ class ProdutoApiController extends Controller
 
     public function show($id)
     {
-        return response()->json(Produto::findOrFail($id));
+        $id = (int)$id;
+        $produto = Produto::findOrFail($id);
+        
+        return response()->json($produto);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateProdutoApiRequest $request, $id)
     {
+        $id = (int)$id;
         $produto = Produto::findOrFail($id);
-        $produto->update($request->all());
+        
+        $validated = $request->validated();
+        $validated['preco'] = (float)$validated['preco'];
+        
+        $produto->update($validated);
 
         return response()->json($produto);
     }
 
     public function destroy($id)
     {
-        Produto::destroy($id);
+        $id = (int)$id;
+        $produto = Produto::findOrFail($id);
+        $produto->delete();
 
-        return response()->json(['message' => 'Produto deletado com sucesso']);
+        return response()->json(['message' => 'Produto deletado com sucesso'], 200);
     }
 }
