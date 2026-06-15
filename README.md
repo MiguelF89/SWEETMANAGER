@@ -236,6 +236,4 @@ Funcionalidades principais operacionais e novas melhorias sendo implementadas.
 
 Miguel Francisco Barbosa Domingues
 
-GitHub:
-https://github.com/MiguelF89
 
