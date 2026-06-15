@@ -239,5 +239,3 @@ Miguel Francisco Barbosa Domingues
 GitHub:
 https://github.com/MiguelF89
 
-LinkedIn:
-https://www.linkedin.com/
