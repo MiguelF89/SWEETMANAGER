@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         // Adiciona user_id em produtos
@@ -17,8 +16,7 @@ return new class extends Migration
                   ->onDelete('cascade');
         });
 
-        // Adiciona user_id em instituicoes
-        Schema::table('instituicoes', function (Blueprint $table) {
+        Schema::table('clientes', function (Blueprint $table) {
             $table->foreignId('user_id')
                   ->nullable()
                   ->after('id')
@@ -43,7 +41,7 @@ return new class extends Migration
             $table->dropColumn('user_id');
         });
 
-        Schema::table('instituicoes', function (Blueprint $table) {
+        Schema::table('clientes', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');
         });

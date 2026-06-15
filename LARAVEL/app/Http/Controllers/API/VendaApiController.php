@@ -14,16 +14,16 @@ class VendaApiController extends Controller
     public function index()
     {
         return response()->json(
-            Venda::with(['instituicao', 'produto'])->get()
+            Venda::with(['cliente', 'produto'])->get()
         );
     }
 
     public function store(StoreVendaApiRequest $request)
     {
         $validated = $request->validated();
-        
+
         $produto = Produto::findOrFail($validated['produto_id']);
-        
+
         $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
         $validated['quantidade'] = (int)$validated['quantidade'];
 
@@ -35,8 +35,8 @@ class VendaApiController extends Controller
     public function show($id)
     {
         $id = (int)$id;
-        $venda = Venda::with(['instituicao', 'produto'])->findOrFail($id);
-        
+        $venda = Venda::with(['cliente', 'produto'])->findOrFail($id);
+
         return response()->json($venda);
     }
 
@@ -46,9 +46,9 @@ class VendaApiController extends Controller
         $venda = Venda::findOrFail($id);
 
         $validated = $request->validated();
-        
+
         $produto = Produto::findOrFail($validated['produto_id']);
-        
+
         $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
         $validated['quantidade'] = (int)$validated['quantidade'];
 
@@ -62,7 +62,7 @@ class VendaApiController extends Controller
         $id = (int)$id;
         $venda = Venda::findOrFail($id);
         $venda->delete();
-        
+
         return response()->json(['message' => 'Venda deletada com sucesso'], 200);
     }
 }

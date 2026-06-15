@@ -8,19 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class Instituicao extends Model
+class Cliente extends Model
 {
     use HasFactory;
 
-    protected $table = 'instituicoes';
+    protected $table = 'clientes';
 
-    protected $fillable = ['user_id', 'nome', 'contato', 'cnpj'];
+    protected $fillable = ['user_id', 'nome', 'contato', 'cpf'];
 
     // ─── Mutators: normaliza antes de salvar ──────────────────────────────────
 
-    public function setCnpjAttribute(?string $value): void
+    public function setCpfAttribute(?string $value): void
     {
-        $this->attributes['cnpj'] = BrasilHelper::normalizeCnpj($value);
+        $this->attributes['cpf'] = BrasilHelper::normalizeCpf($value);
     }
 
     public function setContatoAttribute(?string $value): void
@@ -30,9 +30,9 @@ class Instituicao extends Model
 
     // ─── Accessors: formata ao ler ────────────────────────────────────────────
 
-    public function getCnpjFormattedAttribute(): string
+    public function getCpfFormattedAttribute(): string
     {
-        return BrasilHelper::formatCnpj($this->attributes['cnpj'] ?? '');
+        return BrasilHelper::formatCpf($this->attributes['cpf'] ?? '');
     }
 
     public function getContatoFormattedAttribute(): string
@@ -50,9 +50,9 @@ class Instituicao extends Model
             }
         });
 
-        static::creating(function (Instituicao $instituicao) {
-            if (Auth::check() && empty($instituicao->user_id)) {
-                $instituicao->user_id = Auth::id();
+        static::creating(function (Cliente $cliente) {
+            if (Auth::check() && empty($cliente->user_id)) {
+                $cliente->user_id = Auth::id();
             }
         });
     }

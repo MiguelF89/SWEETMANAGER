@@ -4,74 +4,71 @@ namespace App\Helpers;
 
 class BrasilHelper
 {
-    // ─── CNPJ ────────────────────────────────────────────────────────────────
+    // ─── CPF ─────────────────────────────────────────────────────────────────
 
     /**
      * Remove tudo que não for dígito.
      */
-    public static function normalizeCnpj(?string $cnpj): string
+    public static function normalizeCpf(?string $cpf): string
     {
-        return preg_replace('/\D/', '', (string) $cnpj);
+        return preg_replace('/\D/', '', (string) $cpf);
     }
 
     /**
-     * Formata dígitos para 00.000.000/0000-00.
-     * Retorna o valor original se não tiver 14 dígitos.
+     * Formata dígitos para 000.000.000-00.
+     * Retorna o valor original se não tiver 11 dígitos.
      */
-    public static function formatCnpj(?string $cnpj): string
+    public static function formatCpf(?string $cpf): string
     {
-        $digits = self::normalizeCnpj($cnpj);
+        $digits = self::normalizeCpf($cpf);
 
-        if (strlen($digits) !== 14) {
-            return (string) $cnpj;
+        if (strlen($digits) !== 11) {
+            return (string) $cpf;
         }
 
-        return substr($digits, 0, 2) . '.' .
-               substr($digits, 2, 3) . '.' .
-               substr($digits, 5, 3) . '/' .
-               substr($digits, 8, 4) . '-' .
-               substr($digits, 12, 2);
+        return substr($digits, 0, 3) . '.' .
+               substr($digits, 3, 3) . '.' .
+               substr($digits, 6, 3) . '-' .
+               substr($digits, 9, 2);
     }
 
     /**
-     * Valida estruturalmente o CNPJ (dígitos verificadores).
+     * Valida estruturalmente o CPF (dígitos verificadores).
      */
-    public static function validateCnpj(?string $cnpj): bool
+    public static function validateCpf(?string $cpf): bool
     {
-        $digits = self::normalizeCnpj($cnpj);
+        $digits = self::normalizeCpf($cpf);
 
-        if (strlen($digits) !== 14) {
+        if (strlen($digits) !== 11) {
             return false;
         }
 
-        // Rejeita sequências idênticas (00000000000000, etc.)
-        if (preg_match('/^(\d)\1{13}$/', $digits)) {
+        // Rejeita sequências idênticas conhecidas (111.111.111-11, etc.)
+        if (preg_match('/^(\d)\1{10}$/', $digits)) {
             return false;
         }
 
         // Primeiro dígito verificador
         $sum = 0;
-        $weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        for ($i = 0; $i < 12; $i++) {
-            $sum += (int) $digits[$i] * $weights[$i];
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (int) $digits[$i] * (10 - $i);
         }
         $remainder = $sum % 11;
         $first = $remainder < 2 ? 0 : 11 - $remainder;
 
-        if ((int) $digits[12] !== $first) {
+        if ((int) $digits[9] !== $first) {
             return false;
         }
 
         // Segundo dígito verificador
         $sum = 0;
-        $weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-        for ($i = 0; $i < 13; $i++) {
-            $sum += (int) $digits[$i] * $weights[$i];
+        for ($i = 0; $i < 10; $i++) {
+            $sum += (int) $digits[$i] * (11 - $i);
         }
         $remainder = $sum % 11;
         $second = $remainder < 2 ? 0 : 11 - $remainder;
 
-        return (int) $digits[13] === $second;
+        return (int) $digits[10] === $second;
     }
 
     // ─── Telefone ─────────────────────────────────────────────────────────────
@@ -86,8 +83,8 @@ class BrasilHelper
 
     /**
      * Formata automaticamente:
-     *   11 dígitos → (XX) XXXXX-XXXX  (celular)
-     *   10 dígitos → (XX) XXXX-XXXX   (fixo)
+     * 11 dígitos → (XX) XXXXX-XXXX  (celular)
+     * 10 dígitos → (XX) XXXX-XXXX   (fixo)
      * Retorna o valor original para outros tamanhos.
      */
     public static function formatPhone(?string $phone): string

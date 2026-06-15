@@ -7,7 +7,7 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <form method="GET" action="{{ route('relatorio.index') }}" class="inline">
-                    <select name="ano" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium focus:border-blue-500 focus:ring-blue-500" onchange="this.form.submit()">
+                    <select name="ano" class="pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white cursor-pointer focus:border-blue-500 focus:ring-blue-500" onchange="this.form.submit()">
                         @foreach($anos as $a)
                             <option value="{{ $a }}" {{ $a == $ano ? 'selected' : '' }}>{{ $a }}</option>
                         @endforeach
@@ -21,7 +21,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <!-- KPIs -->
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="bg-white shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-600">
                     <p class="text-sm font-medium text-gray-500">Vendas {{ $ano }}</p>
@@ -41,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- Próximos vencimentos -->
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Próximos vencimentos</h3>
                 @if($proximosVencimentos->isEmpty())
@@ -68,7 +66,6 @@
                 @endif
             </div>
 
-            <!-- Gráficos -->
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="bg-white shadow-sm sm:rounded-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Vendas vs Custos por mês</h3>
@@ -87,112 +84,112 @@
         </div>
     </div>
 
-    @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
-        const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-        const dados  = @json($meses->values());
+        document.addEventListener("DOMContentLoaded", function () {
+            const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            const dados  = @json($meses->values());
 
-        const vendas    = dados.map(d => d.vendas);
-        const custos    = dados.map(d => d.custos);
-        const pendentes = dados.map(d => d.pendentes);
+            const vendas    = dados.map(d => d.vendas);
+            const custos    = dados.map(d => d.custos);
+            const pendentes = dados.map(d => d.pendentes);
 
-        // ── Vendas vs Custos ──────────────────────────────────────────
-        new Chart(document.getElementById('chartVendasCustos'), {
-            type: 'bar',
-            data: {
-                labels: MESES,
-                datasets: [
-                    {
-                        label: 'Vendas',
-                        data: vendas,
-                        backgroundColor: 'rgba(79,70,229,.75)',
-                        borderRadius: 6,
-                    },
-                    {
-                        label: 'Custos pagos',
+            // ── Vendas vs Custos ──────────────────────────────────────────
+            new Chart(document.getElementById('chartVendasCustos'), {
+                type: 'bar',
+                data: {
+                    labels: MESES,
+                    datasets: [
+                        {
+                            label: 'Vendas',
+                            data: vendas,
+                            backgroundColor: 'rgba(79,70,229,.75)',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Custos pagos',
+                            data: custos,
+                            backgroundColor: 'rgba(220,38,38,.65)',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Boletos pendentes',
+                            data: pendentes,
+                            backgroundColor: 'rgba(217,119,6,.55)',
+                            borderRadius: 6,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: v => 'R$ ' + v.toLocaleString('pt-BR')
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ── Pizza ─────────────────────────────────────────────────────
+            const totalVendas  = vendas.reduce((a,b)  => a+b, 0);
+            const totalCustos  = custos.reduce((a,b)  => a+b, 0);
+            const totalPend    = pendentes.reduce((a,b)=> a+b, 0);
+
+            new Chart(document.getElementById('chartPizza'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Vendas', 'Custos pagos', 'Pendentes'],
+                    datasets: [{
+                        data: [totalVendas, totalCustos, totalPend],
+                        backgroundColor: [
+                            'rgba(79,70,229,.8)',
+                            'rgba(220,38,38,.8)',
+                            'rgba(217,119,6,.8)',
+                        ],
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ' R$ ' + ctx.parsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ── Custos mensal (linha) ─────────────────────────────────────
+            new Chart(document.getElementById('chartCustos'), {
+                type: 'line',
+                data: {
+                    labels: MESES,
+                    datasets: [{
+                        label: 'Custos (R$)',
                         data: custos,
-                        backgroundColor: 'rgba(220,38,38,.65)',
-                        borderRadius: 6,
-                    },
-                    {
-                        label: 'Boletos pendentes',
-                        data: pendentes,
-                        backgroundColor: 'rgba(217,119,6,.55)',
-                        borderRadius: 6,
-                    },
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'top' } },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: v => 'R$ ' + v.toLocaleString('pt-BR')
+                        borderColor: 'rgba(220,38,38,.9)',
+                        backgroundColor: 'rgba(220,38,38,.1)',
+                        fill: true,
+                        tension: .35,
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: { callback: v => 'R$' + v.toLocaleString('pt-BR') }
                         }
                     }
                 }
-            }
-        });
-
-        // ── Pizza ─────────────────────────────────────────────────────
-        const totalVendas  = vendas.reduce((a,b)  => a+b, 0);
-        const totalCustos  = custos.reduce((a,b)  => a+b, 0);
-        const totalPend    = pendentes.reduce((a,b)=> a+b, 0);
-
-        new Chart(document.getElementById('chartPizza'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Vendas', 'Custos pagos', 'Pendentes'],
-                datasets: [{
-                    data: [totalVendas, totalCustos, totalPend],
-                    backgroundColor: [
-                        'rgba(79,70,229,.8)',
-                        'rgba(220,38,38,.8)',
-                        'rgba(217,119,6,.8)',
-                    ],
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ' R$ ' + ctx.parsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-                        }
-                    }
-                }
-            }
-        });
-
-        // ── Custos mensal (linha) ─────────────────────────────────────
-        new Chart(document.getElementById('chartCustos'), {
-            type: 'line',
-            data: {
-                labels: MESES,
-                datasets: [{
-                    label: 'Custos (R$)',
-                    data: custos,
-                    borderColor: 'rgba(220,38,38,.9)',
-                    backgroundColor: 'rgba(220,38,38,.1)',
-                    fill: true,
-                    tension: .35,
-                    pointRadius: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        ticks: { callback: v => 'R$' + v.toLocaleString('pt-BR') }
-                    }
-                }
-            }
+            });
         });
     </script>
-    @endpush
 </x-app-layout>

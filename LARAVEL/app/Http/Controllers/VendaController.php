@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVendaRequest;
 use App\Http\Requests\UpdateVendaRequest;
 use App\Models\Venda;
-use App\Models\Instituicao;
+use App\Models\Cliente;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 
@@ -14,25 +14,25 @@ class VendaController extends Controller
     public function index()
     {
         $search = request('search');
-        
-        $vendas = Venda::with(['instituicao', 'produto'])
+
+        $vendas = Venda::with(['cliente', 'produto'])
             ->when($search, function ($query) use ($search) {
-                $query->whereHas('instituicao', function ($q) use ($search) {
+                $query->whereHas('cliente', function ($q) use ($search) {
                     $q->where('nome', 'like', "%{$search}%");
                 })->orWhereHas('produto', function ($q) use ($search) {
                     $q->where('nome', 'like', "%{$search}%");
                 });
             })
             ->paginate(10);
-        
+
         return view('vendas.index', compact('vendas', 'search'));
     }
 
     public function create()
     {
-        $instituicoes = Instituicao::all();
+        $clientes = Cliente::all();
         $produtos = Produto::all();
-        return view('vendas.create', compact('instituicoes', 'produtos'));
+        return view('vendas.create', compact('clientes', 'produtos'));
     }
 
     public function store(StoreVendaRequest $request)
@@ -40,7 +40,7 @@ class VendaController extends Controller
         $validated = $request->validated();
 
         $produto = Produto::findOrFail($validated['produto_id']);
-        
+
         // Calcula o valor total de forma segura no backend
         $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
         $validated['quantidade'] = (int)$validated['quantidade'];
@@ -52,9 +52,9 @@ class VendaController extends Controller
 
     public function edit(Venda $venda)
     {
-        $instituicoes = Instituicao::all();
+        $clientes = Cliente::all();
         $produtos = Produto::all();
-        return view('vendas.edit', compact('venda', 'instituicoes', 'produtos'));
+        return view('vendas.edit', compact('venda', 'clientes', 'produtos'));
     }
 
     public function update(UpdateVendaRequest $request, Venda $venda)
@@ -62,7 +62,7 @@ class VendaController extends Controller
         $validated = $request->validated();
 
         $produto = Produto::findOrFail($validated['produto_id']);
-        
+
         // Calcula o valor total de forma segura no backend
         $validated['valor_total'] = $produto->preco * (float)$validated['quantidade'];
         $validated['quantidade'] = (int)$validated['quantidade'];

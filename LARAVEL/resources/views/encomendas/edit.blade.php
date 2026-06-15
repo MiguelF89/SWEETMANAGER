@@ -30,7 +30,7 @@
                         @error('descricao') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-3">
+                    <div class="grid gap-4 md:grid-cols-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Quantidade</label>
                             <input type="number" name="quantidade" value="{{ old('quantidade', $encomenda->quantidade) }}" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required />
@@ -48,7 +48,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Horário de entrega</label>
-                            <input type="time" name="horario_entrega" value="{{ old('horario_entrega', $encomenda->horario_entrega) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                            <input type="time" name="horario_entrega" value="{{ old('horario_entrega', $encomenda->horario_entrega ? substr($encomenda->horario_entrega, 0, 5) : '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                             @error('horario_entrega') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -59,12 +59,8 @@
                         @error('link_pagamento') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="repassado_cliente" value="1" {{ old('repassado_cliente', $encomenda->repassado_cliente) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" />
-                            Repassado ao cliente
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <div class="block">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                             <input type="checkbox" name="pago" value="1" {{ old('pago', $encomenda->pago) ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" />
                             Pago
                         </label>

@@ -1,6 +1,6 @@
 @if ($errors->any())
     <div {{ $attributes }}>
-        <div class="font-medium text-red-600">{{ __('Whoops! Something went wrong.') }}</div>
+        <div class="font-medium text-red-600">{{ __('Ocorreu o(s) seguinte(s) erro(s):') }}</div>
 
         <ul class="mt-3 list-disc list-inside text-sm text-red-600">
             @foreach ($errors->all() as $error)

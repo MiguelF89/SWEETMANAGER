@@ -14,13 +14,15 @@ class StoreEncomendaRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $linkPagamento = trim($this->link_pagamento ?? '');
+
         $this->merge([
-            'repassado_cliente' => $this->has('repassado_cliente'),
-            'pago' => $this->has('pago'),
             'cliente' => trim($this->cliente ?? ''),
             'descricao' => trim($this->descricao ?? ''),
             'observacoes' => trim($this->observacoes ?? ''),
-            'link_pagamento' => trim($this->link_pagamento ?? '') ?: null,
+            'link_pagamento' => $linkPagamento ?: null,
+            'repassado_cliente' => !empty($linkPagamento),
+            'pago' => $this->has('pago'), // Força a existência do campo como true ou false antes de validar
             'quantidade' => $this->quantidade !== null ? (int)$this->quantidade : null,
             'valor' => $this->valor !== null ? (float)$this->valor : null,
         ]);
@@ -28,8 +30,6 @@ class StoreEncomendaRequest extends FormRequest
 
     public function rules(): array
     {
-        $today = Carbon::today()->format('Y-m-d');
-        
         return [
             'cliente' => [
                 'required',
@@ -76,12 +76,14 @@ class StoreEncomendaRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d',
-                "after_or_equal:$today",
                 function ($attribute, $value, $fail) {
                     try {
                         $data = Carbon::createFromFormat('Y-m-d', $value);
-                        if ($data->isPast() && $data->format('Y-m-d') !== Carbon::today()->format('Y-m-d')) {
-                            $fail('A data de entrega não pode ser no passado.');
+                        $hoje = Carbon::today();
+
+                        // Agora avalia o valor booleano real que foi tratado no prepareForValidation
+                        if ($data->lt($hoje) && !$this->input('pago')) {
+                            $fail('A data de entrega só pode ser no passado se a encomenda já estiver paga.');
                         }
                     } catch (\Exception $e) {
                         $fail('A data de entrega está em formato inválido.');
@@ -134,7 +136,6 @@ class StoreEncomendaRequest extends FormRequest
             'data_entrega.required' => 'A data de entrega é obrigatória.',
             'data_entrega.date' => 'A data de entrega deve ser uma data válida.',
             'data_entrega.date_format' => 'A data de entrega deve estar no formato YYYY-MM-DD.',
-            'data_entrega.after_or_equal' => 'A data de entrega não pode ser no passado.',
             'horario_entrega.date_format' => 'O horário deve estar no formato HH:MM.',
             'horario_entrega.regex' => 'O horário deve ser válido (00:00 a 23:59).',
             'link_pagamento.url' => 'O link de pagamento deve ser uma URL válida.',

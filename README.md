@@ -1,83 +1,198 @@
-SWEETMANAGER
+# SweetManager
 
-Sistema de gestão com foco em controle financeiro e leitura automatizada de boletos (imagem, PDF e câmera), integrado a uma API própria.
+Sistema de gestão administrativa e financeira desenvolvido em Laravel, com leitura automatizada de boletos bancários através de imagens, PDFs e captura por câmera.
 
-Visão Geral
+---
 
-O SweetManager é uma aplicação desenvolvida em Laravel que combina:
+## Visão Geral
 
-Gestão administrativa
-Controle financeiro
-Leitura automatizada de boletos bancários
+O SweetManager foi desenvolvido para automatizar processos financeiros e reduzir o trabalho manual relacionado ao registro e controle de boletos.
 
-O objetivo é reduzir o trabalho manual no registro de contas e permitir um acompanhamento mais eficiente de gastos.
+Além da leitura inteligente de boletos, o sistema oferece recursos de gestão administrativa, cadastro de clientes, produtos, vendas e acompanhamento financeiro.
 
-Funcionalidades
-Gestão
-Estrutura administrativa base
-Preparado para expansão (relatórios e dashboards)
-Leitor de Boletos
-Upload de imagem (JPG/PNG)
-Upload de PDF
-Captura via câmera (mobile e desktop)
+---
+
+## Funcionalidades
+
+### Gestão Financeira
+
+* Controle de boletos
+* Registro de pagamentos
+* Relatórios financeiros
+* Resumo de valores pagos e pendentes
+
+### Gestão Comercial
+
+* Cadastro de clientes
+* Cadastro de produtos
+* Controle de vendas
+* Controle de encomendas
+
+### Leitor Inteligente de Boletos
+
+Suporte para:
+
+* Imagens JPG
+* Imagens PNG
+* Arquivos PDF
+* Captura por câmera
+
 Extração automática de:
-valor
-data de vencimento
-banco emissor
-linha digitável
-Como Funciona
-Arquivo (imagem ou PDF)
-        ↓
-Conversão para imagem (se necessário)
-        ↓
-Leitura de código de barras (zbar)
-        ↓
-Fallback OCR (tesseract)
-        ↓
-Normalização do código
-        ↓
-Extração de dados
-🛠️ Stack Tecnológica
-Backend
-PHP (Laravel)
-API REST
-Laravel Sanctum (autenticação)
-Frontend
-Blade (Laravel)
-JavaScript (Fetch API)
-Tailwind CSS
-Processamento
-zbar → leitura de código de barras
-ghostscript → conversão de PDF
-tesseract → OCR (fallback)
-Ambiente
 
-O projeto roda totalmente em ambiente containerizado com Docker, não sendo necessário instalar PHP manualmente na máquina local.
+* Valor do boleto
+* Data de vencimento
+* Banco emissor
+* Linha digitável
 
-Instalação (Docker)
-1. Clonar o repositório
+---
+
+## Tecnologias Utilizadas
+
+### Backend
+
+* PHP 8.3
+* Laravel
+* Laravel Sanctum
+* API REST
+
+### Frontend
+
+* Blade
+* Tailwind CSS
+* JavaScript
+* Vite
+
+### Banco de Dados
+
+* MySQL 8
+
+### Processamento de Arquivos
+
+* ZBar
+* Tesseract OCR
+* Ghostscript
+* Imagick
+
+### Infraestrutura
+
+* Docker
+* Docker Compose
+* phpMyAdmin
+
+---
+
+## Instalação
+
+### 1. Clonar o repositório
+
+```bash
 git clone https://github.com/MiguelF89/SWEETMANEGER.git
 cd SWEETMANEGER
-2. Subir os containers
+```
+
+### 2. Subir os containers
+
+```bash
 docker compose up -d --build
-3. Acessar o sistema
+```
 
-Abra no navegador:
+### 3. Iniciar o Vite
 
-http://localhost
-4. Executar comandos do Laravel (quando necessário)
-docker exec -it nome_do_container php artisan migrate
+Atualmente o ambiente Docker executa a aplicação Laravel e o banco de dados, porém o servidor de desenvolvimento do Vite precisa ser iniciado manualmente.
 
-Para verificar o nome do container:
+Abra um segundo terminal e execute:
 
+```bash
+docker exec -it <nome_container_app> npm run dev
+```
+
+Para localizar o nome do container:
+
+```bash
 docker ps
-API
-Leitura de boleto
+```
+
+Exemplo:
+
+```bash
+docker exec -it sweetmanager-app-1 npm run dev
+```
+
+### 4. Acessar o sistema
+
+Aplicação:
+
+```text
+http://localhost:8000
+```
+
+phpMyAdmin:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## Estrutura do Projeto
+
+```text
+app/
+├── Http/
+├── Models/
+├── Services/
+
+resources/
+├── views/
+
+routes/
+├── web.php
+├── api.php
+
+database/
+├── migrations/
+```
+
+---
+
+## Fluxo de Leitura de Boletos
+
+```text
+Arquivo (Imagem ou PDF)
+        ↓
+Conversão para imagem
+        ↓
+Leitura de código de barras (ZBar)
+        ↓
+OCR com Tesseract (Fallback)
+        ↓
+Normalização dos dados
+        ↓
+Extração das informações
+```
+
+---
+
+## API
+
+### Leitura de Boleto
+
+Endpoint:
+
+```http
 POST /api/boleto/read
-Exemplo de requisição
-curl -X POST http://localhost/api/boleto/read \
+```
+
+Exemplo:
+
+```bash
+curl -X POST http://localhost:8000/api/boleto/read \
   -F "file=@boleto.jpg"
-Exemplo de resposta
+```
+
+Resposta:
+
+```json
 {
   "success": true,
   "data": {
@@ -87,56 +202,42 @@ Exemplo de resposta
     "linha_digitavel": "..."
   }
 }
-Interface
+```
 
-A interface permite:
+---
 
-Upload de arquivos
-Captura via câmera
-Visualização dos dados extraídos
+## Limitações Conhecidas
 
-Acesso via:
+* O servidor Vite ainda precisa ser iniciado manualmente após a subida dos containers.
+* A leitura OCR pode apresentar limitações em imagens com baixa qualidade.
+* PDFs digitalizados com baixa resolução podem reduzir a taxa de acerto da leitura.
 
-/boleto/reader
-Limitações
-Leitura pode falhar com:
-imagens de baixa qualidade
-PDFs escaneados com baixa resolução
-Dependência de ferramentas externas
-OCR não é 100% preciso
-🔧 Estrutura do Projeto
-app/
- ├── Services/
- │   └── BoletoReaderService.php
- ├── Http/
- │   ├── Controllers/
- │   │   ├── API/
- │   │   └── BoletoController.php
- │   └── Requests/
+---
 
-resources/
- └── views/
-     └── boleto/
+## Roadmap
 
-routes/
- ├── api.php
- └── web.php
-Roadmap
- Melhorar precisão da leitura
- Criar dashboard financeiro
- Implementar relatórios
- Categorizar gastos automaticamente
- Integração com APIs bancárias
-Status do Projeto
+* Dashboard financeiro avançado
+* Exportação de relatórios
+* Categorização automática de despesas
+* Melhorias no OCR
+* Integração com APIs bancárias
 
-Em desenvolvimento
+---
 
-Backend funcional
-Frontend em fase de ajuste
-Autor
+## Status do Projeto
+
+Projeto em desenvolvimento contínuo.
+
+Funcionalidades principais operacionais e novas melhorias sendo implementadas.
+
+---
+
+## Autor
 
 Miguel Francisco Barbosa Domingues
 
-Licença
+GitHub:
+https://github.com/MiguelF89
 
-Projeto para fins educacionais e portfólio
+LinkedIn:
+https://www.linkedin.com/

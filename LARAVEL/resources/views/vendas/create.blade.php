@@ -18,16 +18,16 @@
                     @csrf
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Instituição</label>
-                        <select name="instituicao_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                            <option value="">Selecione uma instituição</option>
-                            @foreach ($instituicoes as $instituicao)
-                                <option value="{{ $instituicao->id }}" {{ old('instituicao_id') == $instituicao->id ? 'selected' : '' }}>
-                                    {{ $instituicao->nome }}
+                        <label class="block text-sm font-medium text-gray-700">Cliente</label>
+                        <select name="cliente_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                            <option value="">Selecione um cliente</option>
+                            @foreach ($clientes as $cliente)
+                                <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>
+                                    {{ $cliente->nome }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('instituicao_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                        @error('cliente_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                     </div>
 
                     <div>

@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\CNPJ;
+use App\Rules\CPF;
 use App\Rules\Telefone;
 
-class UpdateInstituicaoRequest extends FormRequest
+class UpdateClienteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -35,11 +35,11 @@ class UpdateInstituicaoRequest extends FormRequest
                     }
                 }
             ],
-            'cnpj' => [
+            'cpf' => [
                 'required',
                 'string',
-                new CNPJ(),
-                'unique:instituicoes,cnpj,' . $this->instituicao->id,
+                new CPF(),
+                'unique:clientes,cpf,' . $this->cliente->id,
             ],
             'contato' => [
                 'required',
@@ -60,9 +60,9 @@ class UpdateInstituicaoRequest extends FormRequest
             'nome.string' => 'O nome deve ser um texto.',
             'nome.max' => 'O nome não pode exceder 255 caracteres.',
             'nome.not_regex' => 'O nome não pode conter apenas espaços.',
-            'cnpj.required' => 'O CNPJ é obrigatório.',
-            'cnpj.string' => 'O CNPJ deve ser um texto.',
-            'cnpj.unique' => 'Este CNPJ já está cadastrado.',
+            'cpf.required' => 'O CPF é obrigatório.',
+            'cpf.string' => 'O CPF deve ser um texto.',
+            'cpf.unique' => 'Este CPF já está cadastrado.',
             'contato.required' => 'O telefone é obrigatório.',
             'contato.string' => 'O telefone deve ser um texto.',
             'contato.regex' => 'O telefone contém caracteres inválidos.',
@@ -76,7 +76,7 @@ class UpdateInstituicaoRequest extends FormRequest
     {
         $this->merge([
             'nome' => trim($this->nome ?? ''),
-            'cnpj' => trim($this->cnpj ?? ''),
+            'cpf' => trim($this->cpf ?? ''),
             'contato' => trim($this->contato ?? ''),
         ]);
     }

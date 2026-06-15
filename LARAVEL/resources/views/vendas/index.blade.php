@@ -23,7 +23,7 @@
                 <form method="GET" action="{{ route('vendas.index') }}" class="grid gap-4 md:grid-cols-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Busca</label>
-                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Instituição ou Produto" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cliente ou Produto" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                     </div>
 
                     <div class="md:col-span-3 flex justify-end">
@@ -38,7 +38,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Instituição</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantidade</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor Total</th>
@@ -48,8 +48,8 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($vendas as $venda)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $venda->instituicao->nome }}</td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $venda->produto->nome }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $venda->cliente?->nome ?? '—' }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $venda->produto?->nome ?? '—' }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $venda->quantidade }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">R$ {{ number_format($venda->valor_total, 2, ',', '.') }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -70,9 +70,11 @@
                 </table>
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                {{ $vendas->links() }}
-            </div>
+            @if($vendas->hasPages())
+                <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                    {{ $vendas->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

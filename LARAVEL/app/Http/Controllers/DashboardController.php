@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Encomenda;
-use App\Models\Instituicao;
+use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\Venda;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $instituicoes = Instituicao::latest()->limit(5)->get();
+        $clientes = Cliente::latest()->limit(5)->get();
         $produtos = Produto::latest()->limit(5)->get();
         $vendas = Venda::latest()->limit(5)->get();
 
@@ -28,7 +28,7 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard', [
-            'instituicoes' => $instituicoes,
+            'clientes' => $clientes,
             'produtos' => $produtos,
             'vendas' => $vendas,
             'totalEncomendas' => $totalEncomendas,

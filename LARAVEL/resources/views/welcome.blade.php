@@ -49,7 +49,7 @@
                     
                     
                     <p class="text-xl text-gray-600 dark:text-gray-400 mb-12">
-                        Gerencie suas instituições, produtos e vendas com eficiência.
+                        Gerencie suas clientes, produtos e vendas com eficiência.
                     </p>
 
                     

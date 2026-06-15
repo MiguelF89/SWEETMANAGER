@@ -34,12 +34,13 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <a href="{{ route('instituicoes.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium">Criar Instituição</a>
+                <a href="{{ route('clientes.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium">Criar Cliente</a>
                 <a href="{{ route('produtos.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium">Criar Produto</a>
                 <a href="{{ route('vendas.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition font-medium">Criar Venda</a>
                 <a href="{{ route('encomendas.create') }}" class="inline-flex items-center justify-center px-6 py-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium">Criar Encomenda</a>
             </div>
 
+            {{-- Entregas Próximas --}}
             <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -81,71 +82,42 @@
                 </div>
             </div>
 
+            {{-- Últimos Clientes --}}
             <div class="bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Últimas Instituições</h3>
+                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Últimos Clientes</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contato</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">CNPJ</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">CPF</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($instituicoes as $instituicao)
+                                @forelse ($clientes as $cliente)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->nome }}</td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->contato_formatted }}</td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $instituicao->cnpj_formatted }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $cliente->nome }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $cliente->contato_formatted }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $cliente->cpf_formatted }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Nenhuma instituição cadastrada</td>
+                                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Nenhum cliente cadastrado</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('instituicoes.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todas as instituições</a>
+                        <a href="{{ route('clientes.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todos os clientes</a>
                     </div>
                 </div>
             </div>
 
+            {{-- Últimas Vendas --}}
             <div class="bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4 text-gray-900">Últimos Produtos</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nome</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Preço</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($produtos as $produto)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ $produto->nome }}</td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">Nenhum produto cadastrado</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">
-                        <a href="{{ route('produtos.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Ver todos os produtos</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-semibold mb-4">Últimas Vendas</h3>
                     <div class="overflow-x-auto">
@@ -153,31 +125,33 @@
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="border border-gray-300 px-4 py-2">ID</th>
-                                    <th class="border border-gray-300 px-4 py-2">Instituição</th>
+                                    <th class="border border-gray-300 px-4 py-2">Cliente</th>
                                     <th class="border border-gray-300 px-4 py-2">Produto</th>
                                     <th class="border border-gray-300 px-4 py-2">Quantidade</th>
                                     <th class="border border-gray-300 px-4 py-2">Valor Total</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($vendas as $venda)
                                     <tr>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $venda->id }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $venda->instituicao->nome }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $venda->produto->nome }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{{ $venda->quantidade }}</td>
-                                        <td class="border border-gray-300 px-4 py-2">R$ {{ number_format($venda->valor_total, 2, ',', '.') }}</td>
+                                        <td class="border border-gray-300 px-4 py-2 text-sm text-gray-900">{{ $venda->id }}</td>
+                                        {{-- CORREÇÃO: ?-> evita "Attempt to read property on null"
+                                             quando cliente ou produto foi deletado do banco --}}
+                                        <td class="border border-gray-300 px-4 py-2 text-sm text-gray-900">{{ $venda->cliente?->nome ?? '—' }}</td>
+                                        <td class="border border-gray-300 px-4 py-2 text-sm text-gray-900">{{ $venda->produto?->nome ?? '—' }}</td>
+                                        <td class="border border-gray-300 px-4 py-2 text-sm text-gray-900">{{ $venda->quantidade }}</td>
+                                        <td class="border border-gray-300 px-4 py-2 text-sm text-gray-900">R$ {{ number_format($venda->valor_total, 2, ',', '.') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="border border-gray-300 px-4 py-2 text-center">Nenhuma venda cadastrada</td>
+                                        <td colspan="5" class="border border-gray-300 px-4 py-2 text-center text-sm text-gray-500">Nenhuma venda cadastrada</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('vendas.index') }}" class="text-blue-500 hover:text-blue-700">Ver todas as vendas</a>
+                        <a href="{{ route('vendas.index') }}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">Ver todas as vendas</a>
                     </div>
                 </div>
             </div>

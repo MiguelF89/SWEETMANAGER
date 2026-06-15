@@ -137,6 +137,8 @@
         .btn-primary:hover:not(:disabled) { background: #4338ca; }
         .btn-secondary { background: #e5e7eb; color: #374151; margin-bottom: .5rem; }
         .btn-secondary:hover:not(:disabled) { background: #d1d5db; }
+        .btn-danger { background: #dc2626; color: #fff; margin-bottom: .5rem; }
+        .btn-danger:hover:not(:disabled) { background: #b91c1c; }
         .btn-success { background: #16a34a; color: #fff; }
         .btn-success:hover:not(:disabled) { background: #15803d; }
 
@@ -202,14 +204,12 @@
         <a href="{{ route('relatorio.index') }}" class="btn btn-secondary btn-inline">📊 Relatório</a>
     </div>
 
-    <!-- Source tabs -->
     <div class="tabs">
         <button class="tab active" data-tab="camera">📷 Câmera</button>
         <button class="tab" data-tab="image">🖼️ Imagem</button>
         <button class="tab" data-tab="pdf">📄 PDF</button>
     </div>
 
-    <!-- Descrição opcional -->
     <input
         type="text"
         class="descricao-input"
@@ -218,7 +218,6 @@
         maxlength="255"
     />
 
-    <!-- ─── Camera panel ─────────────────────────── -->
     <div id="panel-camera" class="panel active">
         <div id="videoWrapper">
             <video id="video" autoplay playsinline muted></video>
@@ -229,7 +228,6 @@
         <button class="btn btn-primary" id="btnCapture" disabled>📸 Capturar e ler</button>
     </div>
 
-    <!-- ─── Image upload panel ───────────────────── -->
     <div id="panel-image" class="panel">
         <div class="dropzone" id="dropzone-image">
             <input type="file" id="inputImage" accept="image/jpeg,image/png,image/gif,image/webp" />
@@ -244,7 +242,6 @@
         <button class="btn btn-primary" id="btnSendImage" disabled>🔍 Ler boleto</button>
     </div>
 
-    <!-- ─── PDF upload panel ─────────────────────── -->
     <div id="panel-pdf" class="panel">
         <div class="dropzone" id="dropzone-pdf">
             <input type="file" id="inputPdf" accept="application/pdf" />
@@ -258,7 +255,6 @@
         <button class="btn btn-primary" id="btnSendPdf" disabled>🔍 Ler boleto</button>
     </div>
 
-    <!-- ─── Result area ───────────────────────────── -->
     <div id="result" class="hidden"></div>
 </div>
 
@@ -267,34 +263,59 @@
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const API_URL    = '{{ route("boleto.read") }}';
 
-// ─── Tabs ────────────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-        hideResult();
-    });
-});
-
-// ─── Camera ──────────────────────────────────────────────────
+// ─── Camera Global Control ───────────────────────────────────
 const video      = document.getElementById('video');
 const snapshot   = document.getElementById('snapshot');
 const btnStart   = document.getElementById('btnStartCamera');
 const btnCapture = document.getElementById('btnCapture');
 let stream = null;
 
+// Função dedicada a parar a transmissão da câmera de forma segura
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    video.srcObject = null;
+    btnStart.textContent = '▶ Iniciar câmera';
+    btnStart.className = 'btn btn-secondary';
+    btnCapture.disabled = true;
+}
+
+// ─── Tabs ────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        
+        // Se mudou de aba e a câmera estava aberta, desliga ela automaticamente
+        if (tab.dataset.tab !== 'camera') {
+            stopCamera();
+        }
+        
+        hideResult();
+    });
+});
+
+// Alterna o estado da câmera entre ligado e desligado no clique do botão
 btnStart.addEventListener('click', async () => {
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }
-        });
-        video.srcObject = stream;
-        btnStart.disabled = true;
-        btnCapture.disabled = false;
-    } catch (err) {
-        showError('Não foi possível acessar a câmera: ' + err.message);
+    if (stream) {
+        stopCamera();
+    } else {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }
+            });
+            video.srcObject = stream;
+            btnStart.textContent = '⏹ Desligar câmera';
+            btnStart.className = 'btn btn-danger'; // Estilo visual de perigo/cancelamento
+            btnCapture.disabled = false;
+        } catch (err) {
+            showError('Não foi possível acessar a câmera: ' + err.message);
+        }
     }
 });
 
@@ -402,7 +423,7 @@ function showResult(data, message) {
     const result = document.getElementById('result');
     const amount  = data.amount   != null ? 'R$ ' + data.amount.toFixed(2).replace('.', ',') : '—';
     const dueDate = data.due_date != null ? formatDate(data.due_date) : '—';
-    const bank    = data.bank     || '—';
+    const bank     = data.bank     || '—';
 
     result.className = '';
     result.innerHTML = `
@@ -467,6 +488,7 @@ function formatDate(iso) {
     return `${d}/${m}/${y}`;
 }
 
+// Intercepta e processa o envio por arrastar e soltar
 function setupDrop(zone, handler) {
     zone.addEventListener('drop', ev => {
         ev.preventDefault();

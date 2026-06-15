@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Cliente;
+use App\Models\Produto;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,7 +14,7 @@ class Venda extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'instituicao_id', 'produto_id', 'quantidade', 'valor_total'];
+    protected $fillable = ['user_id', 'cliente_id', 'produto_id', 'quantidade', 'valor_total'];
 
     /**
      * Aplica automaticamente o filtro do usuário logado em todas as queries.
@@ -31,9 +34,9 @@ class Venda extends Model
         });
     }
 
-    public function instituicao()
+    public function cliente()
     {
-        return $this->belongsTo(Instituicao::class)->withoutGlobalScopes();
+        return $this->belongsTo(Cliente::class)->withoutGlobalScopes();
     }
 
     public function produto()
